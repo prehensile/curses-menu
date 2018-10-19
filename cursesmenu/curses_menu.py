@@ -14,7 +14,7 @@ class CursesMenu(object):
     currently_active_menu = None
     stdscr = None
 
-    def __init__(self, title=None, subtitle=None, show_exit_option=True):
+    def __init__(self, title=None, subtitle=None, show_exit_option=True, banner=None):
         """
         :ivar str title: The title of the menu
         :ivar str subtitle: The subtitle of the menu
@@ -42,6 +42,7 @@ class CursesMenu(object):
         self.title = title
         self.subtitle = subtitle
         self.show_exit_option = show_exit_option
+        self.banner = banner
 
         self.items = list()
 
@@ -182,7 +183,8 @@ class CursesMenu(object):
     def _main_loop(self, scr):
         if scr is not None:
             CursesMenu.stdscr = scr
-        self.screen = curses.newpad(len(self.items) + 6, CursesMenu.stdscr.getmaxyx()[1])
+        sh, sw = CursesMenu.stdscr.getmaxyx()
+        self.screen = curses.newpad( sh, sw )
         self._set_up_colors()
         curses.curs_set(0)
         CursesMenu.stdscr.refresh()
@@ -198,17 +200,37 @@ class CursesMenu(object):
         """
 
         self.screen.border(0)
+
+        row = 2
+        col = 10
+
         if self.title is not None:
-            self.screen.addstr(2, 2, self.title, curses.A_STANDOUT)
+            self.screen.addstr(row, col, self.title, curses.A_STANDOUT)
+            row += 2
         if self.subtitle is not None:
-            self.screen.addstr(4, 2, self.subtitle, curses.A_BOLD)
+            self.screen.addstr(row, col, self.subtitle, curses.A_BOLD)
+            row += 1
+
+        if self.banner is not None:
+            lines = self.banner.split('\n')
+            for line in lines:
+                self.screen.addstr(row, col, line)
+                row += 1
+
 
         for index, item in enumerate(self.items):
+            
+            item_str = item.show(index)
+            
             if self.current_option == index:
                 text_style = self.highlight
+                item_str = "🌟  %s" % item_str
             else:
                 text_style = self.normal
-            self.screen.addstr(5 + index, 4, item.show(index), text_style)
+                item_str = "   %s" % item_str
+            
+            self.screen.addstr( row + index, col, item_str, text_style)
+
 
         screen_rows, screen_cols = CursesMenu.stdscr.getmaxyx()
         top_row = 0
