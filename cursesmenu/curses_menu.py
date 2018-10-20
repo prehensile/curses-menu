@@ -204,6 +204,8 @@ class CursesMenu(object):
         row = 2
         col = 10
 
+        # curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
+
         if self.title is not None:
             self.screen.addstr(row, col, self.title, curses.A_STANDOUT)
             row += 2
@@ -214,9 +216,11 @@ class CursesMenu(object):
         if self.banner is not None:
             lines = self.banner.split('\n')
             for line in lines:
-                self.screen.addstr(row, col, line)
+                self.screen.addstr(row, col, line )
                 row += 1
+            row += 1
 
+        # curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)
 
         for index, item in enumerate(self.items):
             
